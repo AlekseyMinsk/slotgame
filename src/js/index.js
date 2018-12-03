@@ -102,8 +102,8 @@ function onAssetsLoaded() {
 	];
 
 	const numberOfReels = 4;
-	const numberOfSymbols = 8;
-	const symbolSize = 150;
+	const numberOfSymbols = 6;
+	const symbolSize = 200;
 	const reelHeight = tilingSprite.height / 4;
 
 	let reels = [];
@@ -113,10 +113,10 @@ function onAssetsLoaded() {
 	reelContainer.mask = thing;
 
 	thing.beginFill(0xFF0000, 0.4);
-	thing.moveTo(30, 38);
+	thing.moveTo(33, 38);
 	thing.lineTo(border.width - 50, 38);
 	thing.lineTo(border.width - 50, border.height - 21);
-	thing.lineTo(30, border.height - 21);
+	thing.lineTo(33, border.height - 21);
 
 	for (let i = 0; i < numberOfReels; i++) {
 		let horizontalReelContainer = new PIXI.Container();
@@ -148,7 +148,7 @@ function onAssetsLoaded() {
 	border.addChild(thing);
 	border.addChild(reelContainer);
 	reelContainer.y = 18;
-	reelContainer.x = 30;
+	reelContainer.x = 90;
 	function startPlay() {
 		if (running) return;
 		this.isdown = true;
@@ -171,13 +171,16 @@ function onAssetsLoaded() {
 	app.ticker.add(function (delta) {
 		for (let i = 0; i < reels.length; i++) {
 			let r = reels[i];
-			r.blur.blurX = (r.position - r.previousPosition) * 8;
+			// направление размытия? 
+			r.blur.blurX = (r.previousPosition -r.position) * 60;
+
 			r.previousPosition = r.position;
 
 			for (let j = 0; j < r.symbols.length; j++) {
 				let s = r.symbols[j];
 				let prevy = s.x;
-				s.x = (r.position + j) % r.symbols.length * symbolSize - symbolSize;
+				s.x = symbolSize - (r.position + j) % r.symbols.length * symbolSize + 4 * symbolSize;
+				s.scale.set(0.7, 0.7);
 				if (s.x < 0 && prevy > symbolSize) {
 					s.texture = slotTextures[Math.floor(Math.random() * slotTextures.length)];
 					s.scale.x = s.scale.y = Math.min(symbolSize / s.texture.width, symbolSize / s.texture.height);
