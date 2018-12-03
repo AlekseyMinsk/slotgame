@@ -79,11 +79,11 @@ function onAssetsLoaded() {
 	button.interactive = true;
 	button.buttonMode = true;
 	button
-		.on('pointerdown', startPlay)
-		.on('pointerup', onButtonUp)
-		.on('pointerupoutside', onButtonUp)
-		.on('pointerover', onButtonOver)
-		.on('pointerout', onButtonOut);
+	.on('pointerdown', startPlay)
+	.on('pointerup', onButtonUp)
+	.on('pointerupoutside', onButtonUp)
+	.on('pointerover', onButtonOver)
+	.on('pointerout', onButtonOut);	
 
 	const slotTextures = [
 		PIXI.Texture.fromImage("assets/img/01.png"),
@@ -101,14 +101,13 @@ function onAssetsLoaded() {
 		PIXI.Texture.fromImage("assets/img/13.png"),
 	];
 
-	const numberOfReels = 5;
-	const numberOfStrings = 5;
-	const symbolSize = 140;
-	const reelWidth = tilingSprite.width / numberOfReels;
+	const numberOfReels = 4;
+	const numberOfSymbols = 8;
+	const symbolSize = 150;
+	const reelHeight = tilingSprite.height / 4;
 
 	let reels = [];
 	let reelContainer = new PIXI.Container();
-
 	let thing = new PIXI.Graphics();
 
 	reelContainer.mask = thing;
@@ -120,13 +119,11 @@ function onAssetsLoaded() {
 	thing.lineTo(30, border.height - 21);
 
 	for (let i = 0; i < numberOfReels; i++) {
-		let verticalReelContainer = new PIXI.Container();
-		verticalReelContainer.x = i * reelWidth + 80;
-
-		reelContainer.addChild(verticalReelContainer);
-
+		let horizontalReelContainer = new PIXI.Container();
+		horizontalReelContainer.y = i * reelHeight + 20;
+		reelContainer.addChild(horizontalReelContainer);
 		let reel = {
-			container: verticalReelContainer,
+			container: horizontalReelContainer,
 			symbols: [],
 			position: 0,
 			previousPosition: 0,
@@ -134,30 +131,30 @@ function onAssetsLoaded() {
 		};
 		reel.blur.blurX = 0;
 		reel.blur.blurY = 0;
-		verticalReelContainer.filters = [reel.blur];
+		horizontalReelContainer.filters = [reel.blur];
 
-		for (let j = 0; j < numberOfStrings; j++) {
+		for (let j = 0; j < numberOfSymbols; j++) {
 			let symbol = new PIXI.Sprite(slotTextures[Math.floor(Math.random() * slotTextures.length)]);
-			symbol.y = j * symbolSize;
+			symbol.x = j * symbolSize;
 			symbol.scale.x = symbol.scale.y = Math.min(symbolSize / symbol.width, symbolSize / symbol.height);
-			symbol.x = Math.round((symbolSize - symbol.width) / 2);
+			symbol.y = Math.round((symbolSize - symbol.height) / 2);
 			reel.symbols.push(symbol);
-			verticalReelContainer.addChild(symbol);
+			horizontalReelContainer.addChild(symbol);
+
 		}
 		reels.push(reel);
 	}
+
 	border.addChild(thing);
 	border.addChild(reelContainer);
-	reelContainer.y = 40;
-
+	reelContainer.y = 18;
+	reelContainer.x = 30;
 	function startPlay() {
 		if (running) return;
 		this.isdown = true;
 		this.texture = textureButtonDown;
 		soundSpin.play();
-
 		running = true;
-
 		for (let i = 0; i < reels.length; i++) {
 			let r = reels[i];
 			let extra = Math.floor(Math.random() * 3);
@@ -174,17 +171,17 @@ function onAssetsLoaded() {
 	app.ticker.add(function (delta) {
 		for (let i = 0; i < reels.length; i++) {
 			let r = reels[i];
-			r.blur.blurY = (r.position - r.previousPosition) * 8;
+			r.blur.blurX = (r.position - r.previousPosition) * 8;
 			r.previousPosition = r.position;
 
 			for (let j = 0; j < r.symbols.length; j++) {
 				let s = r.symbols[j];
-				let prevy = s.y;
-				s.y = (r.position + j) % r.symbols.length * symbolSize - symbolSize;
-				if (s.y < 0 && prevy > symbolSize) {
+				let prevy = s.x;
+				s.x = (r.position + j) % r.symbols.length * symbolSize - symbolSize;
+				if (s.x < 0 && prevy > symbolSize) {
 					s.texture = slotTextures[Math.floor(Math.random() * slotTextures.length)];
 					s.scale.x = s.scale.y = Math.min(symbolSize / s.texture.width, symbolSize / s.texture.height);
-					s.x = Math.round((symbolSize - s.width) / 2);
+					s.y = Math.round((symbolSize - s.height) / 2);
 				}
 			}
 		}
@@ -262,19 +259,14 @@ function tweenTo(object, property, target, time, easing, onchange, oncomplete) {
 		complete: oncomplete,
 		start: Date.now()
 	};
-
 	tweening.push(tween);
 	return tween;
 }
-
 
 function lerp(a1, a2, t) {
 	return a1 * (1 - t) + a2 * t;
 }
 
-
 let backout = function (amount) {
 	return (t) => (--t * t * ((amount + 1) * t + amount) + 1); 
 };
-
-
